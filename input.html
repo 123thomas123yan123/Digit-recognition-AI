@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Recognition Canvas</title>
+    <style>
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(28, 20px);
+            grid-template-rows: repeat(28, 20px);
+            gap: 1px;
+            margin-top: 20px;
+        }
+
+        .cell {
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+    <h1>Digit Recognition - Draw the Digit</h1>
+    <div id="grid" class="grid"></div>
+    <button onclick="getArray()">Get Array</button>
+    <pre id="output"></pre>
+
+    <script>
+        const gridSize = 28;
+        const grid = document.getElementById('grid');
+        let isDrawing = false;
+        let startTime = 0;
+
+        // Create 28x28 grid
+        for (let i = 0; i < gridSize * gridSize; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            grid.appendChild(cell);
+
+            // Mouse events to track drawing
+            cell.addEventListener('mousedown', (e) => startDrawing(e));
+            cell.addEventListener('mouseover', (e) => draw(e));
+            cell.addEventListener('mouseup', stopDrawing);
+            cell.addEventListener('mouseleave', stopDrawing);
+        }
+
+        function startDrawing(event) {
+            isDrawing = true;
+            startTime = Date.now();
+            draw(event);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function draw(event) {
+            if (!isDrawing) return;
+
+            const cell = event.target;
+            const elapsed = Date.now() - startTime;
+            const intensity = Math.min(elapsed / 100000, 1); // Darker as the time increases
+
+            cell.style.backgroundColor = `rgb(${255 * intensity}, ${255 * intensity}, ${255 * intensity})`;
+        }
+
+        function getArray() {
+            const pixels = [];
+            const cells = document.querySelectorAll('.cell');
+
+            cells.forEach(cell => {
+                const bgColor = window.getComputedStyle(cell).backgroundColor;
+                const rgb = bgColor.match(/\d+/g).map(Number);
+                const intensity = (255 - rgb[0]) / 255;  // Convert to intensity value between 0 and 1
+                pixels.push(intensity);
+            });
+
+            document.getElementById('output').textContent = JSON.stringify(pixels);
+        }
+    </script>
+</body>
+</html>
