@@ -1,6 +1,7 @@
 #include<iostream>
 #include<vector>
 #include<random>
+#include<algorithm>
 #include<fstream>
 #include<cmath>
 #include<iomanip>
@@ -167,6 +168,7 @@ struct olayer{
             }
             z[i] += biases[i];
         }
+        outputs = util::softmax(z);
     }
 
     std::pair<float, std::vector<float> > backward(float lr, const std::vector<float>& dL_dZ, const std::vector<float>& tl){
@@ -176,10 +178,8 @@ struct olayer{
             }
             biases[i] -= lr * dL_dZ[i];
         }
-
-        outputs = util::softmax(outputs);
-
-        return {util::cross_entropy_loss(tl, outputs), outputs};
+        float loss = util::cross_entropy_loss(tl, outputs);
+        return {loss, outputs};
     }
 };
 
@@ -292,6 +292,9 @@ class NeuralNetwork{
                         for(int j = 0; j < 128; j++){
                             dL_dZ_h[j] += dL_dZ_o[i] * output.weights[i][j];
                         }
+                    }
+                    for(int j = 0; j < 128; j++){
+                        dL_dZ_h[j] *= util::lrelu_d(hidden.z[j]);
                     }
                     hidden.backward(learning_rate, dL_dZ_h);
 
