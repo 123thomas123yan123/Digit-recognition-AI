@@ -1,2 +1,2 @@
 # Digit-recognition-AI
-Digit recognition aI
+I'm sorry a 11 year old wrote this
